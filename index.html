@@ -8,11 +8,13 @@
     <!-- Google Fonts: Outfit for Headings, Inter for Body Text -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800;900&display=swap"
+        rel="stylesheet">
     <!-- Main Style Sheet -->
     <link rel="stylesheet" href="style.css">
     <!-- Paystack Inline JS SDK -->
-    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <script src="https://js.paystack.co/v2/inline.js"></script>
 </head>
 
 <body>
@@ -51,13 +53,15 @@
                 <a href="#shop" class="btn-shop-now">SHOP NOW</a>
             </div>
         </section>
-        
+
 
         <!-- About Section -->
         <section id="about" class="about-section">
             <div class="about-container">
                 <p class="about-text">
-                    E-Millenial Store is an hypothetical online store for gadgets we believe every ‘Millenial’ or ‘Gen-Z’ should have today. We’ve got mobile phones, laptops, smartwatches and other gadgets. Explore all our gadgets and choose the ones that suit you.
+                    E-Millenial Store is an hypothetical online store for gadgets we believe every ‘Millenial’ or
+                    ‘Gen-Z’ should have today. We’ve got mobile phones, laptops, smartwatches and other gadgets. Explore
+                    all our gadgets and choose the ones that suit you.
                 </p>
             </div>
         </section>
@@ -79,7 +83,7 @@
             <div class="logo-box">
                 <img src="Images/EMS.svg" alt="EMS Logo" class="logo-img">
             </div>
-            <p class="footer-text">Designed and Crafted by a Frontend Ninja</p>
+            <p class="footer-text">Designed and Crafted by Adjoa Luna</p>
         </div>
     </footer>
 
@@ -90,7 +94,7 @@
             <h3 class="drawer-title">Shopping Cart</h3>
             <button class="drawer-close-btn" id="cart-close" aria-label="Close Cart">&times;</button>
         </div>
-        
+
         <div class="drawer-body">
             <!-- Scrollable list of cart items -->
             <div class="cart-items-list" id="cart-items-list">
@@ -113,8 +117,14 @@
                 </div>
                 <div class="form-group">
                     <label for="customer-email" class="form-label">Email Address</label>
-                    <input type="email" id="customer-email" class="form-input" placeholder="e.g. john@example.com" required>
+                    <input type="email" id="customer-email" class="form-input" placeholder="e.g. john@example.com"
+                        required>
                     <span class="error-msg" id="email-error">Please enter a valid email address.</span>
+                </div>
+                <div class="form-group">
+                    <label for="customer-phone" class="form-label">Phone Number</label>
+                    <input type="tel" id="customer-phone" class="form-input" placeholder="e.g. 0244000000" required>
+                    <span class="error-msg" id="phone-error">Please enter a valid phone number.</span>
                 </div>
                 <button type="submit" class="btn-checkout" id="btn-paystack-checkout">
                     PAY WITH PAYSTACK

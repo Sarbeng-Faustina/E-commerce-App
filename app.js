@@ -63,8 +63,10 @@ let cartBadgeCount;
 let checkoutForm;
 let customerNameInput;
 let customerEmailInput;
+let customerPhoneInput;
 let nameError;
 let emailError;
+let phoneError;
 let btnPaystackCheckout;
 let successModal;
 let successRefCode;
@@ -99,18 +101,18 @@ function saveCartToStorage() {
  */
 function renderProducts() {
     if (!productsGrid) return;
-    
+
     productsGrid.innerHTML = '';
-    
+
     PRODUCTS.forEach(product => {
         const card = document.createElement('div');
         card.className = 'product-card';
         card.setAttribute('data-product-id', product.id);
-        
+
         const isInCart = cart.some(item => item.id === product.id);
         const buttonText = isInCart ? "REMOVE FROM CART" : "ADD TO CART";
         const buttonClass = isInCart ? "btn-add-to-cart in-cart" : "btn-add-to-cart";
-        
+
         card.innerHTML = `
             <div class="product-image-wrapper">
                 <img src="${product.image}" alt="${product.name}" class="product-image" loading="lazy">
@@ -119,7 +121,7 @@ function renderProducts() {
             <p class="product-price">${CURRENCY_SYMBOL} ${product.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             <button class="${buttonClass}" data-id="${product.id}">${buttonText}</button>
         `;
-        
+
         productsGrid.appendChild(card);
     });
 }
@@ -130,7 +132,7 @@ function renderProducts() {
  */
 function toggleCartDrawer(isOpen) {
     if (!cartDrawer || !cartOverlay) return;
-    
+
     if (isOpen) {
         cartDrawer.classList.add('active');
         cartOverlay.classList.add('active');
@@ -172,10 +174,10 @@ function updateCartUI() {
     if (cartBadgeCount) {
         cartBadgeCount.textContent = totalCount;
     }
-    
+
     // 2. Render cart items inside drawer
     if (!cartItemsList) return;
-    
+
     if (cart.length === 0) {
         cartItemsList.innerHTML = `
             <div class="empty-cart-view">
@@ -189,14 +191,14 @@ function updateCartUI() {
         }
     } else {
         cartItemsList.innerHTML = '';
-        
+
         cart.forEach(item => {
             const product = PRODUCTS.find(p => p.id === item.id);
             if (!product) return;
-            
+
             const itemElement = document.createElement('div');
             itemElement.className = 'cart-item';
-            
+
             itemElement.innerHTML = `
                 <div class="cart-item-img-box">
                     <img src="${product.image}" alt="${product.name}" class="cart-item-img">
@@ -216,21 +218,21 @@ function updateCartUI() {
                     </div>
                 </div>
             `;
-            
+
             cartItemsList.appendChild(itemElement);
         });
-        
+
         if (btnPaystackCheckout) {
             btnPaystackCheckout.disabled = false;
         }
     }
-    
+
     // 3. Update total amount inside drawer
     const totalSum = getCartTotalSum();
     if (cartTotalValue) {
         cartTotalValue.textContent = `${CURRENCY_SYMBOL} ${totalSum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
-    
+
     // 4. Update the products grid button states
     renderProducts();
 }
@@ -240,7 +242,7 @@ function updateCartUI() {
  */
 function animateCartBadge() {
     if (!cartTriggerBtn) return;
-    
+
     cartTriggerBtn.classList.add('bounce');
     setTimeout(() => {
         cartTriggerBtn.classList.remove('bounce');
@@ -255,13 +257,13 @@ function animateCartBadge() {
 function addToCart(productId) {
     const parsedId = parseInt(productId);
     const existingItem = cart.find(item => item.id === parsedId);
-    
+
     if (existingItem) {
         existingItem.quantity += 1;
     } else {
         cart.push({ id: parsedId, quantity: 1 });
     }
-    
+
     saveCartToStorage();
     updateCartUI();
     animateCartBadge();
@@ -274,7 +276,7 @@ function addToCart(productId) {
 function removeFromCart(productId) {
     const parsedId = parseInt(productId);
     cart = cart.filter(item => item.id !== parsedId);
-    
+
     saveCartToStorage();
     updateCartUI();
 }
@@ -287,9 +289,9 @@ function removeFromCart(productId) {
 function changeQuantity(productId, operation) {
     const parsedId = parseInt(productId);
     const item = cart.find(item => item.id === parsedId);
-    
+
     if (!item) return;
-    
+
     if (operation === 'increase') {
         item.quantity += 1;
     } else if (operation === 'decrease') {
@@ -299,7 +301,7 @@ function changeQuantity(productId, operation) {
             return;
         }
     }
-    
+
     saveCartToStorage();
     updateCartUI();
 }
@@ -311,7 +313,7 @@ function changeQuantity(productId, operation) {
  */
 function validateCheckoutForm() {
     let isValid = true;
-    
+
     // Check Full Name
     const name = customerNameInput.value.trim();
     const nameGroup = customerNameInput.parentElement;
@@ -321,7 +323,7 @@ function validateCheckoutForm() {
     } else {
         nameGroup.classList.remove('invalid');
     }
-    
+
     // Check Email
     const email = customerEmailInput.value.trim();
     const emailGroup = customerEmailInput.parentElement;
@@ -332,7 +334,18 @@ function validateCheckoutForm() {
     } else {
         emailGroup.classList.remove('invalid');
     }
-    
+
+    // Check Phone Number
+    const phone = customerPhoneInput.value.trim();
+    const phoneGroup = customerPhoneInput.parentElement;
+    const phoneRegex = /^[0-9+\s()-]{7,15}$/;
+    if (phone === "" || !phoneRegex.test(phone)) {
+        phoneGroup.classList.add('invalid');
+        isValid = false;
+    } else {
+        phoneGroup.classList.remove('invalid');
+    }
+
     return isValid;
 }
 
@@ -342,24 +355,25 @@ function validateCheckoutForm() {
  */
 function payWithPaystack(event) {
     event.preventDefault(); // Stop native HTML submit
-    
+
     if (!validateCheckoutForm()) return;
-    
+
     const email = customerEmailInput.value.trim();
     const name = customerNameInput.value.trim();
+    const phone = customerPhoneInput.value.trim();
     const totalAmount = getCartTotalSum();
-    
+
     // Paystack expects amount in minor units (Pesewas / Cents / Kobo). Multiply by 100.
     const amountInPesewas = Math.round(totalAmount * 100);
-    
+
     // Disable submit action button & display progress state
     btnPaystackCheckout.disabled = true;
     const originalBtnText = btnPaystackCheckout.textContent;
     btnPaystackCheckout.textContent = "INITIALIZING CHEKOUT...";
-    
+
     // Generate simple custom transaction reference
     const txRef = 'EMS_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
-    
+
     // Check if PaystackPop library is loaded properly
     if (typeof PaystackPop === 'undefined') {
         alert("Unable to connect to Paystack payment gateway. Please verify your internet connection and try again.");
@@ -367,13 +381,14 @@ function payWithPaystack(event) {
         btnPaystackCheckout.textContent = originalBtnText;
         return;
     }
-    
+
     const handler = PaystackPop.setup({
-        key: PAYSTACK_PUBLIC_KEY,
+        key: 'pk_test_f91b470fda0413f1a5e30f9dfe82a4b2cfa25c73',
         email: email,
         amount: amountInPesewas,
         currency: CURRENCY_CODE,
         ref: txRef,
+        phone: phone,
         metadata: {
             custom_fields: [
                 {
@@ -382,23 +397,28 @@ function payWithPaystack(event) {
                     value: name
                 },
                 {
+                    display_name: "Phone Number",
+                    variable_name: "customer_phone",
+                    value: phone
+                },
+                {
                     display_name: "Items Quantity",
                     variable_name: "items_qty",
                     value: getCartTotalCount()
                 }
             ]
         },
-        callback: function(response) {
+        callback: function (response) {
             // Callback execution on successful processing
             showPaymentSuccess(response.reference);
         },
-        onClose: function() {
+        onClose: function () {
             // Callback execution if payment frame is closed without completing
             btnPaystackCheckout.disabled = false;
             btnPaystackCheckout.textContent = originalBtnText;
         }
     });
-    
+
     handler.openIframe();
 }
 
@@ -409,17 +429,17 @@ function payWithPaystack(event) {
 function showPaymentSuccess(transactionRef) {
     // 1. Close checkout cart drawer
     toggleCartDrawer(false);
-    
+
     // 2. Empty cart array and localStorage
     cart = [];
     saveCartToStorage();
     updateCartUI();
-    
+
     // 3. Clear customer details form fields
     if (checkoutForm) {
         checkoutForm.reset();
     }
-    
+
     // 4. Update success modal elements and show modal
     if (successRefCode && successModal) {
         successRefCode.textContent = transactionRef;
@@ -444,20 +464,22 @@ function initApp() {
     checkoutForm = document.getElementById('checkout-form');
     customerNameInput = document.getElementById('customer-name');
     customerEmailInput = document.getElementById('customer-email');
+    customerPhoneInput = document.getElementById('customer-phone');
     nameError = document.getElementById('name-error');
     emailError = document.getElementById('email-error');
+    phoneError = document.getElementById('phone-error');
     btnPaystackCheckout = document.getElementById('btn-paystack-checkout');
     successModal = document.getElementById('success-modal');
     successRefCode = document.getElementById('success-ref-code');
     btnSuccessClose = document.getElementById('btn-success-close');
-    
+
     // B. Render the gadget listing
     renderProducts();
-    
+
     // C. Hydrate cart from browser cache
     loadCartFromStorage();
     updateCartUI();
-    
+
     // D. Attach Event Listeners
     // Toggle cart drawer events
     if (cartTriggerBtn) {
@@ -469,7 +491,7 @@ function initApp() {
     if (cartOverlay) {
         cartOverlay.addEventListener('click', () => toggleCartDrawer(false));
     }
-    
+
     // Dynamic add-to-cart clicks from the products grid
     if (productsGrid) {
         productsGrid.addEventListener('click', (event) => {
@@ -484,13 +506,13 @@ function initApp() {
             }
         });
     }
-    
+
     // Quantity controllers inside the cart list drawer
     if (cartItemsList) {
         cartItemsList.addEventListener('click', (event) => {
             const target = event.target;
             const productId = target.getAttribute('data-id');
-            
+
             if (target.classList.contains('btn-increase')) {
                 changeQuantity(productId, 'increase');
             } else if (target.classList.contains('btn-decrease')) {
@@ -500,7 +522,7 @@ function initApp() {
             }
         });
     }
-    
+
     // Inputs blur/focus error state validations
     if (customerNameInput) {
         customerNameInput.addEventListener('blur', () => {
@@ -517,12 +539,20 @@ function initApp() {
             }
         });
     }
-    
+    if (customerPhoneInput) {
+        customerPhoneInput.addEventListener('blur', () => {
+            const phoneRegex = /^[0-9+\s()-]{7,15}$/;
+            if (phoneRegex.test(customerPhoneInput.value.trim())) {
+                customerPhoneInput.parentElement.classList.remove('invalid');
+            }
+        });
+    }
+
     // Paystack Checkout Form execution
     if (checkoutForm) {
         checkoutForm.addEventListener('submit', payWithPaystack);
     }
-    
+
     // Close successful checkout modal popup
     if (btnSuccessClose && successModal) {
         btnSuccessClose.addEventListener('click', () => {
