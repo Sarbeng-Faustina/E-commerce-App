@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Millenial Store | EMS</title>
+    <!-- Google Fonts: Outfit for Headings, Inter for Body Text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Main Style Sheet -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Paystack Inline JS SDK -->
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo-link">
+                <div class="logo-box">
+                    <img src="Images/EMS.svg" alt="EMS Logo" class="logo-img">
+                </div>
+            </a>
+            <nav class="nav-menu">
+                <a href="#intro" class="nav-link">Intro</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#shop" class="nav-link">Shop</a>
+            </nav>
+            <button class="cart-trigger-btn" id="cart-trigger" aria-label="Shopping Cart">
+                <img src="Images/cart.svg" alt="Cart Icon" class="cart-icon-svg">
+                <span class="cart-count-badge" id="cart-badge-count">0</span>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="intro" class="hero-section">
+            <div class="hero-container">
+                <div class="hero-content">
+                    <h1 class="hero-title">THE<br>E-MILLENIAL<br>STORE</h1>
+                    <a href="#shop" class="btn-shop-now">SHOP NOW</a>
+                </div>
+                <div class="hero-image-box">
+                    <img src="Images/heroImage.svg" alt="EMS Hero Illustration" class="hero-illustration">
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="about-section">
+            <div class="about-container">
+                <p class="about-text">
+                    E-Millenial Store is an hypothetical online store for gadgets we believe every ‘Millenial’ or ‘Gen-Z’ should have today. We’ve got mobile phones, laptops, smartwatches and other gadgets. Explore all our gadgets and choose the ones that suit you.
+                </p>
+            </div>
+        </section>
+
+        <!-- Shop Section -->
+        <section id="shop" class="shop-section">
+            <div class="shop-container">
+                <h2 class="section-title">OUR GADGETS</h2>
+                <div class="products-grid" id="products-grid-container">
+                    <!-- Products will be dynamically rendered here via JavaScript -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="logo-box">
+                <img src="Images/EMS.svg" alt="EMS Logo" class="logo-img">
+            </div>
+            <p class="footer-text">Designed and Crafted by a Frontend Ninja</p>
+        </div>
+    </footer>
+
+    <!-- Shopping Cart Sidebar Drawer -->
+    <div class="cart-drawer-overlay" id="cart-overlay"></div>
+    <aside class="cart-drawer" id="cart-drawer" aria-hidden="true">
+        <div class="drawer-header">
+            <h3 class="drawer-title">Shopping Cart</h3>
+            <button class="drawer-close-btn" id="cart-close" aria-label="Close Cart">&times;</button>
+        </div>
+        
+        <div class="drawer-body">
+            <!-- Scrollable list of cart items -->
+            <div class="cart-items-list" id="cart-items-list">
+                <!-- Dynamically rendered via JavaScript -->
+            </div>
+        </div>
+
+        <div class="drawer-footer">
+            <div class="cart-summary">
+                <span class="summary-label">Total Amount:</span>
+                <span class="summary-value" id="cart-total-value">GH₵ 0.00</span>
+            </div>
+
+            <!-- Checkout Form required by Paystack -->
+            <form class="checkout-form" id="checkout-form" novalidate>
+                <div class="form-group">
+                    <label for="customer-name" class="form-label">Full Name</label>
+                    <input type="text" id="customer-name" class="form-input" placeholder="e.g. John Doe" required>
+                    <span class="error-msg" id="name-error">Please enter your full name.</span>
+                </div>
+                <div class="form-group">
+                    <label for="customer-email" class="form-label">Email Address</label>
+                    <input type="email" id="customer-email" class="form-input" placeholder="e.g. john@example.com" required>
+                    <span class="error-msg" id="email-error">Please enter a valid email address.</span>
+                </div>
+                <button type="submit" class="btn-checkout" id="btn-paystack-checkout">
+                    PAY WITH PAYSTACK
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Custom Premium Success Modal -->
+    <div class="modal-overlay" id="success-modal">
+        <div class="modal-card">
+            <div class="success-icon-box">
+                <img src="Images/check.svg" alt="Check Icon" class="success-check-img">
+            </div>
+            <h3 class="modal-title">Payment Successful</h3>
+            <p class="modal-desc">Thank you for your purchase. Your transaction was processed successfully.</p>
+            <div class="reference-box">
+                <span class="ref-label">Transaction Ref:</span>
+                <span class="ref-code" id="success-ref-code">REF-123456789</span>
+            </div>
+            <button class="btn-modal-close" id="btn-success-close">Continue Shopping</button>
+        </div>
+    </div>
+
+    <!-- Main JavaScript Code -->
+    <script src="app.js"></script>
+</body>
+
+</html>
