@@ -159,10 +159,20 @@ h1, h2, h3, h4 {
 /* Hero Section */
 .hero-section {
     background-color: var(--bg-primary);
-    padding: 60px 0 100px 0;
+    padding: 60px 0 20px 0;
     display: flex;
+    flex-direction: column;
     align-items: center;
     overflow: hidden;
+}
+
+.shop-now-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 10px auto 0 auto;
+    padding: 0 30px;
+    display: flex;
+    justify-content: center;
 }
 
 .hero-container {
@@ -193,13 +203,14 @@ h1, h2, h3, h4 {
 
 .btn-shop-now {
     display: inline-block;
+    align-self: center;
     background-color: var(--accent-orange);
     color: var(--white);
     text-decoration: none;
     font-family: var(--font-body);
     font-weight: 700;
     font-size: 1.1rem;
-    padding: 16px 42px;
+    padding: 10px 100px;
     border-radius: 6px;
     letter-spacing: 0.5px;
     box-shadow: 0 6px 20px rgba(255, 154, 61, 0.25);
