@@ -369,6 +369,21 @@ h1, h2, h3, h4 {
     transform: scale(0.98);
 }
 
+.btn-add-to-cart.in-cart {
+    background-color: var(--text-muted);
+    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.15);
+}
+
+.product-card:hover .btn-add-to-cart.in-cart {
+    background-color: var(--text-muted);
+    box-shadow: 0 6px 15px rgba(107, 114, 128, 0.25);
+}
+
+.btn-add-to-cart.in-cart:hover {
+    background-color: var(--accent-red) !important;
+    box-shadow: 0 6px 15px rgba(255, 0, 0, 0.25) !important;
+}
+
 /* Footer styling */
 .footer {
     background-color: var(--dark-bg);

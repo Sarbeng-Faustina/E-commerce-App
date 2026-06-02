@@ -107,13 +107,17 @@ function renderProducts() {
         card.className = 'product-card';
         card.setAttribute('data-product-id', product.id);
         
+        const isInCart = cart.some(item => item.id === product.id);
+        const buttonText = isInCart ? "REMOVE FROM CART" : "ADD TO CART";
+        const buttonClass = isInCart ? "btn-add-to-cart in-cart" : "btn-add-to-cart";
+        
         card.innerHTML = `
             <div class="product-image-wrapper">
                 <img src="${product.image}" alt="${product.name}" class="product-image" loading="lazy">
             </div>
             <h3 class="product-title">${product.name}</h3>
             <p class="product-price">${CURRENCY_SYMBOL} ${product.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-            <button class="btn-add-to-cart" data-id="${product.id}">ADD TO CART</button>
+            <button class="${buttonClass}" data-id="${product.id}">${buttonText}</button>
         `;
         
         productsGrid.appendChild(card);
@@ -226,6 +230,9 @@ function updateCartUI() {
     if (cartTotalValue) {
         cartTotalValue.textContent = `${CURRENCY_SYMBOL} ${totalSum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
+    
+    // 4. Update the products grid button states
+    renderProducts();
 }
 
 /**
@@ -467,8 +474,13 @@ function initApp() {
     if (productsGrid) {
         productsGrid.addEventListener('click', (event) => {
             if (event.target.classList.contains('btn-add-to-cart')) {
-                const productId = event.target.getAttribute('data-id');
-                addToCart(productId);
+                const productId = parseInt(event.target.getAttribute('data-id'));
+                const isInCart = cart.some(item => item.id === productId);
+                if (isInCart) {
+                    removeFromCart(productId);
+                } else {
+                    addToCart(productId);
+                }
             }
         });
     }
