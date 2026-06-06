@@ -4,7 +4,7 @@
  */
 
 // 1. CONSTANTS & APPLICATION STATE
-const PAYSTACK_PUBLIC_KEY = 'pk_test_57a5ad8f8cbdfb7bbf7ee8109bf1f67f2e140efd'; // Sandbox test key
+const PAYSTACK_PUBLIC_KEY = 'pk_test_f91b470fda0413f1a5e30f9dfe82a4b2cfa25c73'; // Sandbox test key
 const CURRENCY_SYMBOL = 'GH₵';
 const CURRENCY_CODE = 'GHS';
 
@@ -234,7 +234,29 @@ function updateCartUI() {
     }
 
     // 4. Update the products grid button states
-    renderProducts();
+    updateProductButtonsState();
+}
+
+/**
+ * Efficiently update existing product buttons state in the grid
+ * without fully rebuilding the grid elements.
+ */
+function updateProductButtonsState() {
+    if (!productsGrid) return;
+
+    const buttons = productsGrid.querySelectorAll('.btn-add-to-cart');
+    buttons.forEach(button => {
+        const productId = parseInt(button.getAttribute('data-id'));
+        const isInCart = cart.some(item => item.id === productId);
+
+        if (isInCart) {
+            button.textContent = "REMOVE FROM CART";
+            button.className = "btn-add-to-cart in-cart";
+        } else {
+            button.textContent = "ADD TO CART";
+            button.className = "btn-add-to-cart";
+        }
+    });
 }
 
 /**
@@ -356,6 +378,12 @@ function validateCheckoutForm() {
 function payWithPaystack(event) {
     event.preventDefault(); // Stop native HTML submit
 
+    // Guard: Prevent checkout if cart is empty
+    if (cart.length === 0) {
+        alert("Your cart is empty. Please add items to your cart before checking out.");
+        return;
+    }
+
     if (!validateCheckoutForm()) return;
 
     const email = customerEmailInput.value.trim();
@@ -372,7 +400,7 @@ function payWithPaystack(event) {
     btnPaystackCheckout.textContent = "INITIALIZING CHEKOUT...";
 
     // Generate simple custom transaction reference
-    const txRef = 'EMS_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+    const txRef = 'EMS-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
 
     // Check if PaystackPop library is loaded properly
     if (typeof PaystackPop === 'undefined') {
@@ -382,14 +410,15 @@ function payWithPaystack(event) {
         return;
     }
 
-    const handler = PaystackPop.setup({
-        key: 'pk_test_f91b470fda0413f1a5e30f9dfe82a4b2cfa25c73',
+    const paystack = new PaystackPop();
+    paystack.newTransaction({
+        key: PAYSTACK_PUBLIC_KEY,
         email: email,
         amount: amountInPesewas,
         currency: CURRENCY_CODE,
         ref: txRef,
-        phone: phone,
         metadata: {
+            phone: phone,
             custom_fields: [
                 {
                     display_name: "Customer Name",
@@ -408,18 +437,16 @@ function payWithPaystack(event) {
                 }
             ]
         },
-        callback: function (response) {
+        onSuccess: function (transaction) {
             // Callback execution on successful processing
-            showPaymentSuccess(response.reference);
+            showPaymentSuccess(transaction.reference);
         },
-        onClose: function () {
+        onCancel: function () {
             // Callback execution if payment frame is closed without completing
             btnPaystackCheckout.disabled = false;
             btnPaystackCheckout.textContent = originalBtnText;
         }
     });
-
-    handler.openIframe();
 }
 
 /**
